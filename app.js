@@ -8,8 +8,9 @@ const app = express();
 const mongoose = require('mongoose');
 const path = require('path');
 
-const stuffRoutes = require('./routes/stuff')
-const userRoutes = require('./routes/user')
+const stuffRoutes = require('./routes/book')
+const userRoutes = require('./routes/user');
+const { signup } = require('./controllers/user');
 
 // connection mongodb atlas
 mongoose.connect('mongodb+srv://youblalIsagi:6u7vOfdHek2XxKUJ@cluster0.1daai.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
@@ -36,9 +37,13 @@ app.use((req, res, next) => {
    next();
 });
 
-
+app.post("api/auth/signup", signUp)
 app.use('/api/stuff', stuffRoutes)
 app.use('/api/auth', userRoutes)
 app.use('/images', express.static(path.join(__dirname, 'images')));
+
+function signUp(req, res){
+   console.log("req:", req)
+}
 
 module.exports = app;
