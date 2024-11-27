@@ -89,7 +89,7 @@ exports.postRating = (req, res, next) => {
   }
   // si l'id est manquant
   if (id == null || id == "undefined") {
-    res.status(400).send("Book id is missing");
+    res.status(400).send("l'id du livre est manquant");
     return;
   }
   // verifie si la note est entre 0 et 5
@@ -105,7 +105,7 @@ exports.postRating = (req, res, next) => {
       const ratingDb = book.ratings;
       const ratingUser = ratingDb.find((rating) => rating.userId == userId);
       if (ratingUser != null) {
-        res.status(400).send("You have already rated this book");
+        res.status(400).send("Vous avez deja noter ce livre");
         return;
       }
       const newRating = { userId, grade: rating };

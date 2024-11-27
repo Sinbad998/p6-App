@@ -1,4 +1,5 @@
-//authentification avec token
+//Ce middleware vérifie l'authenticité d'un token JWT présent dans l'en-tête d'autorisation, 
+//extrait l'ID utilisateur pour l'ajouter à la requête et bloque l'accès si le token est invalide.
 const jwt = require('jsonwebtoken');
  
 module.exports = (req, res, next) => {
