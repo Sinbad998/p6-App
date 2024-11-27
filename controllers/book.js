@@ -1,4 +1,4 @@
-//logique de fonction ou construction de chaque route
+//logique de fonction ou construction de chaque route pour les Books
 const Book = require('../models/Book')
 const fs = require('fs')
 
@@ -131,7 +131,6 @@ function AverageRating(ratings) {
 }
 
 // notation meilleure livre ²
-
 exports.getBestRating = (req, res, next) => {
   Book.find().sort({ averageRating: -1 }).limit(3) 
     .then(books => res.status(200).json(books))

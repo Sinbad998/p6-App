@@ -1,3 +1,4 @@
+// Bibliotheque node pour gerer le télechargement de fichiers
 const multer = require('multer');
 
 const MIME_TYPES = {

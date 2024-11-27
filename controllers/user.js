@@ -1,3 +1,4 @@
+//logique de fonction ou construction de chaque route pour les users
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken')

@@ -1,3 +1,4 @@
+// modèle Mongoose pour representer les Books dans une base de donnes MongoDB
 const mongoose = require('mongoose');
 
 const bookSchema = new mongoose.Schema({

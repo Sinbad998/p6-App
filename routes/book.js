@@ -1,15 +1,14 @@
-// les routes ou middlewares
+// les routes ou middlewares pour Books
 
+//chemins
 const express = require('express');
 const router = express.Router();
-
 const auth = require('../middleware/auth');
 const multer = require('../middleware/multer-config')
 
+//on prend la logique de consturction de bookCtrl 
+//via le dossier controllers, fichier book.js
 const bookCtrl = require('../controllers/book')
-
-//on prend la logique de consturction de sruffCtrl 
-//via le dossier controllers, fichier stuff.js
 
 //pour sauvegarder ou creer les objets(Books) 
 router.post('/',auth, multer, bookCtrl.createBook);

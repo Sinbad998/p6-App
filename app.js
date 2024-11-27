@@ -21,15 +21,7 @@ mongoose.connect('mongodb+srv://youblalIsagi:6u7vOfdHek2XxKUJ@cluster0.1daai.mon
 //intercepte les requete qui contiennet du json pour le mettre a notre dispo
 app.use(express.json());
 
-//app.get('/', (req, res, next) => {
-  // res.status(200).send('Bienvenue sur le serveur backend !');
- //});
- 
-//app.listen(PORT, function(){
-//      console.log(`Server is running on: ${PORT}`);
-//})
-
-// CORS
+// CORS (autoriser les requêtes provenant de différentes origines)
 app.use((req, res, next) => {
    res.setHeader('Access-Control-Allow-Origin', '*');
    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
@@ -37,6 +29,7 @@ app.use((req, res, next) => {
    next();
 });
 
+// routes
 app.post("api/auth/signup", signUp)
 app.use('/api/stuff', stuffRoutes)
 app.use('/api/auth', userRoutes)
