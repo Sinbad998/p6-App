@@ -29,4 +29,9 @@ router.get('/:id',auth, bookCtrl.getOneBook );
 //pour recup les objets(Books) de la base de données
 router.get('/',auth, bookCtrl.getAllBooks);
 
+// pour recup les miuex notées
+router.get('/bestrating', bookCtrl.getBestRating);
+
+
+
 module.exports = router;

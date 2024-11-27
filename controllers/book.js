@@ -1,7 +1,6 @@
 //logique de fonction ou construction de chaque route
 const Book = require('../models/Book')
 const fs = require('fs')
-const path = require('path')
 
 //pour sauvegarder ou creer les objets(Books)
 exports.createBook = (req, res, next) => {
@@ -11,9 +10,11 @@ exports.createBook = (req, res, next) => {
   const book = new Book({
       ...bookObject,
       userId: req.auth.userId,
-      imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-  });
+      imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+      averageRating: bookObject.ratings[0].grade
 
+  });
+  // sauveagrdedu livre
   book.save()
   .then(() => { res.status(201).json({message: 'Livre enregistré !'})})
   .catch(error => { res.status(400).json( { error })})
@@ -82,25 +83,35 @@ exports.postRating = (req, res, next) => {
 
   const user = req.body.userId;
   
+  // si le user ne correspond pas 
   if (user !== req.auth.userId) {
     return res.status(401).json({ message: 'Non autorisé' });
   }
-  
-  // Check that the note is between 0 and 5
+  // si l'id est manquant
+  if (id == null || id == "undefined") {
+    res.status(400).send("Book id is missing");
+    return;
+  }
+  // verifie si la note est entre 0 et 5
   if (rating < 0 || rating > 5) {
     return res.status(400).json({ error: "La note doit être un nombre entre 0 et 5." });
   }
-  
+  // cherche le livre par son id
   Book.findById(req.params.id)
     .then(book => {
       if (!book) {
-        return res.status(404).json({ error: "Livre non trouvé." });
+        return res.status(404).json({ error: "Livre pas trouvée." });
       }
-      const userRating = book.ratings.find(rating => rating.userId === userId);
-      if (userRating) {
-        return res.status(400).json({ error: "L'utilisateur a déjà noté ce livre." });
+      const ratingDb = book.ratings;
+      const ratingUser = ratingDb.find((rating) => rating.userId == userId);
+      if (ratingUser != null) {
+        res.status(400).send("You have already rated this book");
+        return;
       }
-      book.ratings.push({ userId, grade: rating });
+      const newRating = { userId, grade: rating };
+      ratingDb.push(newRating);
+      book.averageRating = AverageRating(ratingDb);
+
       book.save()
         .then(newBook => {
           res.status(200).json(newBook);
@@ -112,5 +123,18 @@ exports.postRating = (req, res, next) => {
     .catch(error => {
       res.status(500).json({ error });
     });
+};
+
+function AverageRating(ratings) {
+  const sumOfAllGrades = ratings.reduce((sum, rating) => sum + rating.grade, 0);
+  return sumOfAllGrades / ratings.length;
+}
+
+// notation meilleure livre ²
+
+exports.getBestRating = (req, res, next) => {
+  Book.find().sort({ averageRating: -1 }).limit(3) 
+    .then(books => res.status(200).json(books))
+    .catch(error => res.status(400).json({ error }));
 };
 
