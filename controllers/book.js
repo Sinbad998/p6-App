@@ -16,8 +16,12 @@ exports.createBook = (req, res, next) => {
   });
   // sauveagrdedu livre
   book.save()
-  .then(() => { res.status(201).json({message: 'Livre enregistré !'})})
-  .catch(error => { res.status(400).json( { error })})
+  .then(() => {
+    res.status(201).json({ message: 'Livre enregistré !' });
+  })
+  .catch(error => {
+    res.status(400).json({ error });
+  })
 };
 
 // pour modifier les objets(Books)
@@ -132,8 +136,21 @@ function AverageRating(ratings) {
 
 // notation meilleure livre ²
 exports.getBestRating = (req, res, next) => {
-  Book.find().sort({ averageRating: -1 }).limit(3) 
-    .then(books => res.status(200).json(books))
-    .catch(error => res.status(400).json({ error }));
+  console.log("Début de la recherche des meilleurs livres");
+  
+  Book.find()
+    .sort({ averageRating: -1 }) // Tri décroissant
+    .limit(3) // Limitation à 3 résultats
+    .then(books => {
+      console.log("Livres récupérés avec succès :", books);
+      res.status(200).json(books);
+    })
+    .catch(error => {
+      console.error("Erreur lors de la récupération des livres :", error);
+      res.status(400).json({ error });
+    })
+    .finally(() => {
+      console.log("Fin de l'exécution de getBestRating");
+    });
 };
 

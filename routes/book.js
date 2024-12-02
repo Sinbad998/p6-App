@@ -22,14 +22,15 @@ router.put('/:id',auth,multer, bookCtrl.modifyBook);
 // pour supprimer un objet(Book)
 router.delete('/:id',auth, bookCtrl.deleteBook);
 
-//pour recuper un objet(Book) specifique
-router.get('/:id',auth, bookCtrl.getOneBook );
-
-//pour recup les objets(Books) de la base de données
-router.get('/',auth, bookCtrl.getAllBooks);
-
 // pour recup les miuex notées
 router.get('/bestrating', bookCtrl.getBestRating);
+
+//pour recuper un objet(Book) specifique
+router.get('/:id', bookCtrl.getOneBook );
+
+//pour recup les objets(Books) de la base de données
+router.get('/', bookCtrl.getAllBooks);
+
 
 
 
