@@ -1,19 +1,18 @@
 //chemins
 const express = require('express');
-
-// creation de l'application expres
 const app = express();
-
-//importer mongoose
 const mongoose = require('mongoose');
 const path = require('path');
+
+require('dotenv').config();
 
 const bookRoutes = require('./routes/book')
 const userRoutes = require('./routes/user');
 const { signup } = require('./controllers/user');
 
+console.log('MONGODB_URI:', process.env.MONGODB_URI);
 // connection mongodb atlas
-mongoose.connect('mongodb+srv://youblalIsagi:6u7vOfdHek2XxKUJ@cluster0.1daai.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('Connexion à MongoDB réussie !'))
 .catch(() => console.log('Connexion à MongoDB échouée !'));
 

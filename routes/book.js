@@ -5,19 +5,20 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const multer = require('../middleware/multer-config')
+const sharp = require('../middleware/sharp');
 
 //on prend la logique de consturction de bookCtrl 
 //via le dossier controllers, fichier book.js
 const bookCtrl = require('../controllers/book')
 
 //pour sauvegarder ou creer les objets(Books) 
-router.post('/',auth, multer, bookCtrl.createBook);
+router.post('/',auth, multer,sharp, bookCtrl.createBook);
 
 //pour noter un livre
 router.post('/:id/rating', auth, bookCtrl.postRating);
 
 // pour modifier les objets(Books)
-router.put('/:id',auth,multer, bookCtrl.modifyBook);
+router.put('/:id',auth,multer, sharp, bookCtrl.modifyBook);
 
 // pour supprimer un objet(Book)
 router.delete('/:id',auth, bookCtrl.deleteBook);
