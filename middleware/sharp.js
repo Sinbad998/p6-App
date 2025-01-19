@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Middleware pour optimiser les images avec sharp
-const optimizeImage = async (req, res, next) => {
+const newOpImages = async (req, res, next) => {
     if (!req.file) {
         console.log('No file found in request');
         return next(); 
@@ -40,4 +40,4 @@ const optimizeImage = async (req, res, next) => {
     }
 };
 
-module.exports = optimizeImage;
+module.exports = newOpImages;

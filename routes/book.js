@@ -6,7 +6,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const multer = require('../middleware/multer-config')
 const sharp = require('../middleware/sharp');
-const optimizeImage = require('../middleware/sharp');
+const newOpImages = require('../middleware/sharp');
 
 //on prend la logique de consturction de bookCtrl 
 //via le dossier controllers, fichier book.js
