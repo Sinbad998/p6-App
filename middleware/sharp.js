@@ -5,6 +5,7 @@ const path = require('path');
 // Middleware pour optimiser les images avec sharp
 const optimizeImage = async (req, res, next) => {
     if (!req.file) {
+        console.log('No file found in request');
         return next(); 
     }
 
@@ -18,6 +19,7 @@ const optimizeImage = async (req, res, next) => {
             .webp({ quality: 80 }) 
             .toFile(outputPath); 
 
+        console.log('Image optimized, deleting original file...');
         // Supprimer l'image originale pour ne garder que l'image optimisée
         fs.unlink(inputPath, (err) => {
             if (err) {
@@ -28,14 +30,14 @@ const optimizeImage = async (req, res, next) => {
         });
 
         // Ajouter le chemin du fichier optimisé à `req.file`
-        req.file.optimizedPath = outputPath;
-        next();
+        req.file.path = outputPath;
+        req.file.filename = path.basename(outputPath);
 
+        next();
     } catch (error) {
-        console.error('Error processing image:', error);
-        res.status(500).json({ error: 'Image processing failed.' });
+        console.log('Error optimizing image:', error);
+        next(error);
     }
 };
 
-// Exporter le middleware
 module.exports = optimizeImage;
