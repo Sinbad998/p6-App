@@ -84,48 +84,73 @@ exports.getAllBooks = (req, res, next) => {
 // notation livre
 exports.postRating = (req, res, next) => {
   const { userId, rating } = req.body;
+  console.log("lol")
 
-  const user = req.body.userId;
-  
-  // si le user ne correspond pas 
-  if (user !== req.auth.userId) {
+  // Récupérer l'id depuis req.params
+  const id = req.params.id;
+
+  console.log('Données reçues:', { userId, rating, id });
+
+  // Vérifie si l'utilisateur correspond
+  if (userId !== req.auth.userId) {
     return res.status(401).json({ message: 'Non autorisé' });
   }
-  // si l'id est manquant
-  if (id == null || id == "undefined") {
-    res.status(400).send("l'id du livre est manquant");
-    return;
+
+  // Vérifie si l'ID est manquant
+  if (!id) {
+    return res.status(400).json({ message: "L'ID du livre est manquant" });
   }
-  // verifie si la note est entre 0 et 5
+
+  // Vérifie si la note est entre 0 et 5
   if (rating < 0 || rating > 5) {
     return res.status(400).json({ error: "La note doit être un nombre entre 0 et 5." });
   }
-  // cherche le livre par son id
-  Book.findById(req.params.id)
+
+  // Cherche le livre par son ID
+  Book.findById(id)
     .then(book => {
       if (!book) {
-        return res.status(404).json({ error: "Livre pas trouvée." });
+        console.error('Livre non trouvé');
+        return res.status(404).json({ message: 'Livre non trouvé' });
       }
-      const ratingDb = book.ratings;
-      const ratingUser = ratingDb.find((rating) => rating.userId == userId);
-      if (ratingUser != null) {
-        res.status(400).send("Vous avez deja noter ce livre");
-        return;
-      }
-      const newRating = { userId, grade: rating };
-      ratingDb.push(newRating);
-      book.averageRating = AverageRating(ratingDb);
 
+      // Vérifie si l'utilisateur actuel est différent de l'utilisateur qui a téléchargé le livre
+      if (book.uploaderId === userId) {
+        console.error('Vous ne pouvez pas noter votre propre livre');
+        return res.status(403).json({ message: "Vous ne pouvez pas noter votre propre livre" });
+      }
+
+      // Vérifie si l'utilisateur a déjà noté ce livre
+      const existingRating = book.ratings.find(r => r.userId === userId);
+      if (existingRating) {
+        console.error('Vous avez déjà noté ce livre');
+        return res.status(400).json({ message: "Vous avez déjà noté ce livre" });
+      }
+
+      // Ajoute la note de l'utilisateur au livre
+      book.ratings.push({ userId, rating });
+      console.log('Notes actuelles:', book.ratings);
+      // Calcule la nouvelle moyenne des notes
+      const totalRatings = book.ratings.reduce((acc, r) => acc + r.rating, 0);
+      book.averageRating = totalRatings / book.ratings.length;
+
+      // Vérifie que averageRating n'est pas NaN
+      if (isNaN(book.averageRating)) {
+        console.error('Erreur: averageRating est NaN');
+        return res.status(500).json({ error: 'Erreur lors du calcul de la moyenne des notes' });
+      }
+
+      // Sauvegarde le livre avec la nouvelle note
       book.save()
-        .then(newBook => {
-          res.status(200).json(newBook);
-        })
+        .then(() => res.status(200).json({ message: 'Note ajoutée avec succès' }))
         .catch(error => {
-          res.status(500).json({ error });
+          console.error('Error saving book:', error);
+          res.status(500).json({ error: 'Erreur lorddds de la sauvegarde du livre', details: error });
         });
     })
     .catch(error => {
-      res.status(500).json({ error });
+      console.error('Error finding book:', error);
+      res.status(500).json({ error: 'Erreur lors de leea recherche du livre', details: error });
     });
 };
 

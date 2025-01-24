@@ -1,5 +1,6 @@
-// Bibliotheque node pour gerer le télechargement de fichiers
 const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 
 const MIME_TYPES = {
   'image/jpg': 'jpg',
@@ -9,7 +10,11 @@ const MIME_TYPES = {
 
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
-    callback(null, 'images');
+    const dir = 'images';
+    if (!fs.existsSync(dir)){
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    callback(null, dir);
   },
   
   filename: (req, file, callback) => {
@@ -20,4 +25,4 @@ const storage = multer.diskStorage({
 });
 
 // téléchargement image
-module.exports = multer({storage: storage}).single('image');
+module.exports = multer({ storage: storage }).single('image');
