@@ -128,10 +128,10 @@ exports.postRating = (req, res, next) => {
       }
 
       // Ajoute la note de l'utilisateur au livre
-      book.ratings.push({ userId, rating });
+      book.ratings.push({ userId, grade: rating });
       console.log('Notes actuelles:', book.ratings);
       // Calcule la nouvelle moyenne des notes
-      const totalRatings = book.ratings.reduce((acc, r) => acc + r.rating, 0);
+      const totalRatings = book.ratings.reduce((acc, r) => acc + r.grade, 0);
       book.averageRating = totalRatings / book.ratings.length;
 
       // Vérifie que averageRating n'est pas NaN
@@ -142,7 +142,7 @@ exports.postRating = (req, res, next) => {
 
       // Sauvegarde le livre avec la nouvelle note
       book.save()
-        .then(() => res.status(200).json({ message: 'Note ajoutée avec succès' }))
+        .then((r) => res.status(200).json(r))
         .catch(error => {
           console.error('Error saving book:', error);
           res.status(500).json({ error: 'Erreur lorddds de la sauvegarde du livre', details: error });
@@ -178,4 +178,3 @@ exports.getBestRating = (req, res, next) => {
       console.log("Fin de l'exécution de getBestRating");
     });
 };
-
