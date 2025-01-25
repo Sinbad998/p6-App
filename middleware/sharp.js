@@ -11,7 +11,7 @@ const newOpImages = async (req, res, next) => {
 
     try {
         const inputPath = req.file.path;
-        const outputPath = inputPath + '.webp'; // Sortie en format WebP
+        const outputPath = inputPath + '.webp'; 
 
         console.log('Optimizing image...');
         await sharp(inputPath)
@@ -20,7 +20,6 @@ const newOpImages = async (req, res, next) => {
             .toFile(outputPath); 
 
         console.log('Image optimized, deleting original file...');
-        // Supprimer l'image originale pour ne garder que l'image optimisée
         fs.unlink(inputPath, (err) => {
             if (err) {
                 console.log('Error deleting original file:', err);
@@ -29,7 +28,6 @@ const newOpImages = async (req, res, next) => {
             }
         });
 
-        // Ajouter le chemin du fichier optimisé à `req.file`
         req.file.path = outputPath;
         req.file.filename = path.basename(outputPath);
 
