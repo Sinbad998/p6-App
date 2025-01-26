@@ -1,12 +1,11 @@
 const sharp = require('sharp');
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 
-// Middleware pour optimiser les images avec sharp
-const newOpImages = async (req, res, next) => {
+module.exports = async (req, res, next) => {
     if (!req.file) {
         console.log('No file found in request');
-        return next(); 
+        return next();
     }
 
     try {
@@ -20,22 +19,19 @@ const newOpImages = async (req, res, next) => {
             .toFile(outputPath); 
 
         console.log('Image optimized, deleting original file...');
-        fs.unlink(inputPath, (err) => {
-            if (err) {
-                console.log('Error deleting original file:', err);
-            } else {
-                console.log('Original file deleted');
-            }
-        });
+        try {
+            await fs.unlink(inputPath);
+            console.log('Original file deleted');
+        } catch (err) {
+            console.log('Error deleting original file:', err);
+        }
 
         req.file.path = outputPath;
         req.file.filename = path.basename(outputPath);
 
         next();
     } catch (error) {
-        console.log('Error optimizing image:', error);
+        console.log('Error processing image:', error);
         next(error);
     }
 };
-
-module.exports = newOpImages;

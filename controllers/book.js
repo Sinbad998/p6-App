@@ -1,6 +1,6 @@
 //logique de fonction ou construction de chaque route pour les Books
 const Book = require('../models/Book')
-const fs = require('fs')
+const fs = require('fs').promises;
 
 exports.createBook = (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
@@ -22,48 +22,41 @@ exports.createBook = (req, res, next) => {
   })
 };
 
-
-exports.modifyBook = (req, res, next) => {
+exports.modifyBook = async (req, res, next) => {
   const bookObject = req.file ? {
       ...JSON.parse(req.body.book),
       imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
   } : { ...req.body };
 
   delete bookObject._userId;
-  Book.findOne({_id: req.params.id})
-  .then((book) => {
+  try {
+    const book = await Book.findOne({ _id: req.params.id });
     if (book.userId != req.auth.userId) {
-        res.status(401).json({ message : 'Pas autorisé' });
+      return res.status(401).json({ message: 'Pas autorisé' });
     } else {
-        if (req.file) {
-            // Supprimer l'ancienne image
-            const filename = book.imageUrl.split('/images/')[1];
-            fs.unlink(`images/${filename}`, (err) => {
-                if (err) console.log(err);
-                // Mettre à jour le livre après suppression de l'image
-                Book.updateOne({ _id: req.params.id}, { ...bookObject, _id: req.params.id})
-                .then(() => res.status(200).json({message : 'Livre modifié!'}))
-                .catch(error => res.status(401).json({ error }));
-            });
-        } else {
-            // Mettre à jour le livre sans suppression d'image
-            Book.updateOne({ _id: req.params.id}, { ...bookObject, _id: req.params.id})
-            .then(() => res.status(200).json({message : 'Livre modifié!'}))
-            .catch(error => res.status(401).json({ error }));
+      if (req.file) {
+        const filename = book.imageUrl.split('/images/')[1];
+        try {
+          await fs.unlink(`images/${filename}`);
+          console.log('Ancienne image supprimée');
+        } catch (err) {
+          console.log('Erreur lors de la suppression du fichier original:', err);
         }
+      }
+      // Mettre à jour le livre après suppression de l'image
+      await Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id });
+      res.status(200).json({ message: 'Livre modifié!' });
     }
-})
-      .catch((error) => {
-          res.status(400).json({ error });
-      });
+  } catch (error) {
+    res.status(400).json({ error });
+  }
 };
-
 
 exports.deleteBook = (req, res, next) => {
   Book.findOne({ _id: req.params.id})
       .then(book => {
           if (book.userId != req.auth.userId) {
-              res.status(401).json({message: 'Not authorized'});
+              res.status(401).json({message: 'Non autorisé'});
           } else {
               const filename = book.imageUrl.split('/images/')[1];
               fs.unlink(`images/${filename}`, () => {
