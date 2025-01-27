@@ -1,6 +1,7 @@
 //logique de fonction ou construction de chaque route pour les Books
 const Book = require('../models/Book')
-const fs = require('fs').promises;
+const fs = require('fs')
+const path = require("path");
 
 exports.createBook = (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
@@ -31,32 +32,44 @@ exports.modifyBook = async (req, res, next) => {
   delete bookObject._userId;
   try {
     const book = await Book.findOne({ _id: req.params.id });
+    if (!book) {
+      return res.status(404).json({ message: 'Livre non trouvé' });
+    }
     if (book.userId != req.auth.userId) {
       return res.status(401).json({ message: 'Pas autorisé' });
-    } else {
-      if (req.file) {
-        const filename = book.imageUrl.split('/images/')[1];
-        try {
-          await fs.unlink(`images/${filename}`);
-          console.log('Ancienne image supprimée');
-        } catch (err) {
-          console.log('Erreur lors de la suppression du fichier original:', err);
-        }
-      }
-      // Mettre à jour le livre après suppression de l'image
-      await Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id });
-      res.status(200).json({ message: 'Livre modifié!' });
     }
+
+    if (req.file) {
+      // Séparation du nom du fichier image existant
+      const filename = book.imageUrl.split('/images/')[1];
+      // Suppression de l'image originale
+      try {
+        fs.unlinkSync(`images/${filename}`, (err) => {
+          if (err) {
+            console.log('Erreur lors de la suppression du fichier original:', err);
+          } else {
+            console.log('Ancienne image supprimée');
+          }
+        });
+      } catch (err) {
+        console.log('Erreur inattendue:', err);
+      }
+    }
+
+    // Mettre à jour le livre après suppression de l'image
+    await Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id });
+    return res.status(200).json({ message: 'Livre modifié!' });
   } catch (error) {
-    res.status(400).json({ error });
+    return res.status(400).json({ error });
   }
 };
+
 
 exports.deleteBook = (req, res, next) => {
   Book.findOne({ _id: req.params.id})
       .then(book => {
           if (book.userId != req.auth.userId) {
-              res.status(401).json({message: 'Non autorisé'});
+              res.status(401).json({message: 'Not authorized'});
           } else {
               const filename = book.imageUrl.split('/images/')[1];
               fs.unlink(`images/${filename}`, () => {
